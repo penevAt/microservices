@@ -1,0 +1,12 @@
+aws sqs create-queue --queue external2-notifications --endpoint-url http://localstack:4576 --region us-east-1
+aws sqs create-queue --queue external-notifications --endpoint-url http://localstack:4576 --region us-east-1
+aws sns create-topic --name notifications --endpoint-url http://localstack:4575 --region us-east-1
+aws sns subscribe --topic-arn arn:aws:sns:us-east-1:123456789012:notifications --protocol sqs --notification-endpoint arn:aws:sqs:us-east-1:123456789012:external2-notifications --endpoint-url http://localstack:4575 --region us-east-1
+aws sns subscribe --topic-arn arn:aws:sns:us-east-1:123456789012:notifications --protocol sqs --notification-endpoint arn:aws:sqs:us-east-1:123456789012:external-notifications --endpoint-url http://localstack:4575 --region us-east-1
+aws sns publish --topic-arn arn:aws:sns:us-east-1:123456789012:notifications --message "{
+        "topic":"topic1",
+        "content": "HELLO"
+}" --endpoint-url http://localstack:4575 --region us-east-1
+aws sqs receive-message --queue-url http://localstack:4576/queue/external2-notifications --endpoint-url http://localstack:4576 --region us-east-1
+aws sqs receive-message --queue-url http://localstack:4576/queue/external-notifications --endpoint-url http://localstack:4576 --region us-east-1
+

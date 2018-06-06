@@ -1,0 +1,32 @@
+version: '2.1'
+
+services:
+  localstack:
+    image: localstack/localstack
+    environment:
+      - SERVICES=sns,sqs
+    ports:
+      - "4567-4583:4567-4583"
+    volumes:
+      - "/tmp/localstack:/tmp/localstack"
+  init:
+    image: busybox
+    command: sh -c 'sleep 10; sh ./create_topics'
+    volumes:
+      - "./create_topics:/create_topics"
+    depends_on:
+      - localstack
+  internal-notifications:
+    build:  ./internal-notifications
+    ports:
+      - "8080:8080"
+  external-notifications:
+    build: ./external-notifications
+    depends_on:
+      - eventstore
+    ports:
+      - "8081:8080"
+  eventstore:
+    build: ./eventstore-notifications
+    ports:
+      - "8082:8080"
